@@ -1,0 +1,24 @@
+<!-- <div class="container-fluid container-main"> -->
+<div class="container-main">
+    <div class="d-flex h-100">
+        <!-- <div class="p-2">
+            Flex Item
+        </div> -->
+        <div #ngVisualizationContainer class="flex-grow-1 visualization-container">
+            <app-visualization *ngIf="loadVisualization" [containerWidth]="containerWidth" [containerHeight]="containerHeight"></app-visualization>
+        </div>
+    </div>
+</div>
+
+<!-- <div class="d-inline-flex flex-column">
+        <div class="d-flex p-2 btn-nav">
+            Nav Button 1
+        </div>
+    </div>
+    <div class="d-inline-flex p-2 flex-column">
+        <div class="w-100 visualization-container">
+            Main Column
+        </div>
+    </div> -->
+
+<!-- </div> -->
