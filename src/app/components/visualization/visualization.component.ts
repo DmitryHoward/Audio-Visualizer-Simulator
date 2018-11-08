@@ -125,12 +125,25 @@ export class VisualizationComponent implements OnInit {
     let barHeight = this.containerHeight * 0.1;
     for (let i = 0; i < 64; i++) {
       this.appendRect(this.svg, 'rect-' + i, barHeight, barWidth, "#44CF6C", "#44CF6C", 1, (barWidth * i) + (5 * i), (this.containerHeight / 2) - (barHeight / 2));
+
+      // this.appendRect(this.svg, 'rect-' + i, barHeight, barWidth, "#44CF6C", "#44CF6C", 1, (barWidth * i) + (5 * i), (this.containerHeight / 2) - (barHeight / 2));
     }
     // this.appendRect(this.svg, 'testRect', 1, this.containerWidth, "blue", "blue", 1, 0, this.containerHeight / 2);
   }
 
   prepVisualization3() {
+    this.getSoundCardData(this.selectedVisualization);
+    // let barWidth = (this.containerWidth - (64 * 5)) / 64;
+    // let barHeight = this.containerHeight * 0.1;
+    // let barHeight = (this.containerHeight - (128 * 5)) / 128;
+    let barHeight = this.containerHeight / 128;
 
+    // let barWidth = this.containerWidth * 0.1;
+    let barWidth = 0;
+    for (let i = 0; i < 128; i++) {
+      this.appendRect(this.svg, 'rect-' + i, barHeight, barWidth, "#44CF6C", "#44CF6C", 1, (this.containerWidth / 2) - (barWidth / 2), (barHeight * i));
+      // this.appendRect(this.svg, 'rect-' + i, barHeight, barWidth, "#44CF6C", "#44CF6C", 1, (this.containerWidth / 2) - (barWidth / 2), (barHeight * i) + (5 * i));
+    }
   }
 
   prepVisualization4() {
@@ -194,6 +207,7 @@ export class VisualizationComponent implements OnInit {
     let bufferLength = analyser.fftSize;
     let binCount = analyser.frequencyBinCount;
     let dataArray = new Uint8Array(bufferLength);
+    let dataArray3 = new Float32Array(bufferLength);
     let rotate = 0;
     var background = 0;
     var backgroundCounter = 1;
@@ -431,12 +445,157 @@ export class VisualizationComponent implements OnInit {
         .style('background-color', newColor);
     }
 
+    var draw3 = function () {
+      drawVisual = requestAnimationFrame(draw3);
+      // analyser.getByteFrequencyData(dataArray);
+
+      analyser.getFloatFrequencyData(dataArray3);
+      console.log('dataArray3 = ');
+      console.log(dataArray3);
+
+      // let baseWidth = containerWidth * 0.1;
+      let baseWidth = 0;
+      let baseHeight = containerHeight / 128;
+
+      // let baseHeight = (containerHeight - (128 * 5)) / 128;
+
+
+      let baseR = bgFocusR ? 45 : 255;
+      let baseG = bgFocusG ? 100 : 170;
+      let baseB = bgFocusB ? 43 : 185;
+
+      let maxR = bgFocusR ? 45 : 255;
+      let maxG = bgFocusG ? 150 : 25;
+      let maxB = bgFocusB ? 45 : 215;
+
+
+      let diffR = maxR - baseR;
+      let diffG = maxG - baseG;
+      let diffB = maxB - baseB;
+      let bgBaseR = 0;
+      let bgBaseG = 0;
+      let bgBaseB = 0;
+      let bgMaxR = bgFocusR ? 255 : 25;
+      let bgMaxG = bgFocusG ? 255 : 50;
+      let bgMaxB = bgFocusB ? 255 : 50;
+      let bgDiffR = bgMaxR - bgBaseR;
+      let bgDiffG = bgMaxG - bgBaseG;
+      let bgDiffB = bgMaxB - bgBaseB;
+
+      let avgData = 0;
+
+      for (let i = 0; i < 64; i++) {
+        avgData = avgData + dataArray[i];
+        let mod = dataArray[i] / 256;
+        let newR = baseR + (diffR * mod);
+        let newG = baseG + (diffG * mod);
+        let newB;
+        if (mod > 0.5) {
+          newB = baseB + (diffB * mod);
+        }
+        else {
+          newB = baseB - (diffB * mod);
+        }
+        // let newB = baseB + (diffB * mod);
+        let newStrokeColor = 'rgba(' + newR + ',' + newG + ',' + newB + ')';
+        let newFillColor = 'rgba(' + newR + ',' + newG + ',' + newB + ',' + mod + ')';
+        // let newHeight = baseHeight + ((containerHeight * 0.9) * (dataArray[i] / 256));
+        // let trans_x = d3.select('#rect-')
+        let newWidth = baseWidth + ((containerWidth * 0.9) * (dataArray[i] / 256));
+        d3.select("#rect-" + (63 - i))
+          .attr('stroke', newStrokeColor)
+          .attr('fill', newFillColor)
+          .attr('width', newWidth)
+          .attr('transform', 'translate(' + ((containerWidth / 2) - (newWidth / 2)) + ',' + ((baseHeight * (63 - i))) + ')');
+        // .attr('transform', 'translate(' + ((containerWidth / 2) - (newWidth / 2)) + ',' + ((baseHeight * (63 - i)) + (5 * (63 - i))) + ')');
+
+        d3.select("#rect-" + (127 - i))
+          .attr('stroke', newStrokeColor)
+          .attr('fill', newFillColor)
+          .attr('width', newWidth)
+          .attr('transform', 'translate(' + ((containerWidth / 2) - (newWidth / 2)) + ',' + ((baseHeight * (i + 64))) + ')');
+        // .attr('transform', 'translate(' + ((containerWidth / 2) - (newWidth / 2)) + ',' + ((baseHeight * (i + 64)) + (5 * (i + 64))) + ')');
+      }
+      avgData = avgData / dataArray.length;
+      let avgHighF = (dataArray[56] + dataArray[57] + dataArray[58] + dataArray[59] + dataArray[60] + dataArray[61] + dataArray[62] + dataArray[63]) / 8;
+      let avgMidF = 0;
+      let avgMidFCounter = 0;
+      for (let i = 3; i < 56; i++) {
+        avgMidF = avgMidF + dataArray[i];
+        avgMidFCounter++;
+      }
+      avgMidF = avgMidF / avgMidFCounter;
+      let avgLowF = (dataArray[0] + dataArray[1] + dataArray[2]) / 3;
+
+      // console.log('avgHighF = ' + avgHighF);
+      // console.log('avgMidF = ' + avgMidF);
+      console.log('avgLowF = ' + avgLowF);
+
+
+      // let trigger = (dataArray[63] + dataArray[62] + dataArray[61] + dataArray[60]) / 4;
+      if (dataArray[63] > 5 || dataArray[0] >= 256 || dataArray[1] >= 256) {
+        // if ((dataArray[59] > 10 && dataArray[0] > 245) || (dataArray[63] > 5) && dataArray[0] > 230) {
+        // console.log('avgData < 30');
+        if (toggleFocus == 0) {
+          bgFocusB = false;
+          bgFocusR = true;
+          bgFocusG = false;
+          toggleFocus++;
+        }
+        else if (toggleFocus == 1) {
+          bgFocusB = false;
+          bgFocusR = false;
+          bgFocusG = true;
+          toggleFocus++;
+        }
+        else if (toggleFocus == 2) {
+          bgFocusB = true;
+          bgFocusR = false;
+          bgFocusG = false;
+          toggleFocus++;
+        }
+        else if (toggleFocus == 3) {
+          bgFocusB = true;
+          bgFocusR = true;
+          bgFocusG = false;
+          toggleFocus++;
+        }
+        else if (toggleFocus == 4) {
+          bgFocusB = true;
+          bgFocusR = false;
+          bgFocusG = true;
+          toggleFocus++;
+        }
+        else if (toggleFocus == 5) {
+          bgFocusB = false;
+          bgFocusR = true;
+          bgFocusG = true;
+          toggleFocus++;
+        }
+        else if (toggleFocus == 6) {
+          bgFocusB = true;
+          bgFocusR = true;
+          bgFocusG = true;
+          toggleFocus = 0;
+        }
+      }
+      let newR = bgBaseR + (bgDiffR * (avgData / 256));
+      let newG = bgBaseG + (bgDiffG * (avgData / 256));
+      let newB = bgBaseB + (bgDiffB * (avgData / 256));
+      let newColor = 'rgb(' + newR + ',' + newG + ',' + newB + ')';
+      // d3.select('#svg-container')
+      //   .style('background-color', newColor);
+    }
+
 
     if (selectedVisualization == 1) {
       draw1();
     }
     else if (selectedVisualization == 2) {
       draw2();
+    }
+    else if (selectedVisualization == 3) {
+      draw3();
     }
   }
 }
