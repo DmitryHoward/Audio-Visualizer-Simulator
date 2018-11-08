@@ -6,3 +6,56 @@
     background-color: #000;
     overflow: hidden;
 }
+
+.floating-controls {
+    position: fixed;
+    background-color: rgba(34, 34, 34, 0.2);
+    border: 1px solid #aaa;
+    border-radius: 10px;
+    width: 40vw;
+    height: 5vh;
+    bottom: 5vh;
+    right: 30vw;
+    left: 30vw;
+    opacity: 0;
+    transition: all 0.5s ease;
+    font-size: 24px;
+}
+
+
+/* .container-main:hover .floating-controls {
+    bottom: 10vh;
+    opacity: 1;
+} */
+
+.floating-controls:hover {
+    bottom: 10vh;
+    opacity: 1;
+}
+
+.floating-controls-reveal {
+    bottom: 10vh;
+    opacity: 1;
+}
+
+.visualization-selector {
+    /* font-size: 16px; */
+    /* font-weight: bold; */
+    /* transition: all 0.5s ease; */
+}
+
+.visualization-selector-container {
+    border: 3px ridge rgba(0, 0, 0, 0);
+    transition: all 0.4s ease;
+}
+
+.visualization-selector-container:hover {
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 3px ridge rgba(255, 255, 255, 0.4);
+    border-right: 3px ridge rgba(255, 255, 255, 0.4);
+}
+
+.selected-visualization {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
