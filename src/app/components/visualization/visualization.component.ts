@@ -147,7 +147,13 @@ export class VisualizationComponent implements OnInit {
   }
 
   prepVisualization4() {
-
+    this.getSoundCardData(this.selectedVisualization);
+    let numberOfShapes = 10;
+    let squareL = this.containerHeight / numberOfShapes;
+    // let borderWidth = 1;
+    for (let i = 0; i < numberOfShapes; i++) {
+      this.appendRect(this.svg, 'rect-' + i, squareL, squareL, "blue", "#44CF6C", 1, (this.containerWidth / 2) - (squareL / 2), (squareL * i));
+    }
   }
 
   prepAnimationCanvas() {
@@ -207,7 +213,7 @@ export class VisualizationComponent implements OnInit {
     let bufferLength = analyser.fftSize;
     let binCount = analyser.frequencyBinCount;
     let dataArray = new Uint8Array(bufferLength);
-    let dataArray3 = new Float32Array(bufferLength);
+    // let dataArray3 = new Float32Array(bufferLength);
     let rotate = 0;
     var background = 0;
     var backgroundCounter = 1;
@@ -447,11 +453,11 @@ export class VisualizationComponent implements OnInit {
 
     var draw3 = function () {
       drawVisual = requestAnimationFrame(draw3);
-      // analyser.getByteFrequencyData(dataArray);
+      analyser.getByteFrequencyData(dataArray);
 
-      analyser.getFloatFrequencyData(dataArray3);
-      console.log('dataArray3 = ');
-      console.log(dataArray3);
+      // analyser.getFloatFrequencyData(dataArray3);
+      // console.log('dataArray3 = ');
+      // console.log(dataArray3);
 
       // let baseWidth = containerWidth * 0.1;
       let baseWidth = 0;
@@ -459,7 +465,7 @@ export class VisualizationComponent implements OnInit {
 
       // let baseHeight = (containerHeight - (128 * 5)) / 128;
 
-
+      //shape colors
       let baseR = bgFocusR ? 45 : 255;
       let baseG = bgFocusG ? 100 : 170;
       let baseB = bgFocusB ? 43 : 185;
@@ -468,10 +474,11 @@ export class VisualizationComponent implements OnInit {
       let maxG = bgFocusG ? 150 : 25;
       let maxB = bgFocusB ? 45 : 215;
 
-
       let diffR = maxR - baseR;
       let diffG = maxG - baseG;
       let diffB = maxB - baseB;
+
+      //background colors
       let bgBaseR = 0;
       let bgBaseG = 0;
       let bgBaseB = 0;
@@ -587,6 +594,42 @@ export class VisualizationComponent implements OnInit {
       //   .style('background-color', newColor);
     }
 
+    var draw4 = function () {
+      drawVisual = requestAnimationFrame(draw4);
+      analyser.getByteFrequencyData(dataArray);
+
+      let numberOfShapes = 10;
+      let dataRangePerShape = Math.floor(analyser.fftSize / numberOfShapes);
+      let squareL = containerHeight / numberOfShapes;
+      let pathLength = 10;
+
+      for (let i = 0; i < numberOfShapes; i++) {
+        let avgData = 0;
+
+        //get average of assigned data range
+        for (let j = 0; j < dataRangePerShape; j++) {
+          avgData += dataArray[j + (i * dataRangePerShape)];
+        }
+        avgData = avgData / dataRangePerShape;
+        console.log('avgData = ' + avgData);
+        let pathLength = 50 * (avgData / 256);
+
+        d3.select('#rect-' + i)
+        .attr('stroke-dashoffset', pathLength)
+          .transition()
+          .duration(Math.max(avgData, 100))
+          .on('start', function repeatDash() {
+            d3.active(this)
+              .attr('stroke-dashoffset', 0)
+              .transition()
+              .attr('stroke-dashoffset', avgData)
+              .transition()
+              .on('start', repeatDash)
+          });
+      }
+
+    }
+
 
     if (selectedVisualization == 1) {
       draw1();
@@ -596,6 +639,9 @@ export class VisualizationComponent implements OnInit {
     }
     else if (selectedVisualization == 3) {
       draw3();
+    }
+    else if (selectedVisualization == 4) {
+      draw4();
     }
   }
 }
