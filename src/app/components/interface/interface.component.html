@@ -1,0 +1,16 @@
+<div class="container-main" (mousemove)="mouseMove()">
+    <div class="d-flex h-100">
+        <div #ngVisualizationContainer class="flex-grow-1 visualization-container">
+            <app-visualization *ngIf="loadVisualization" [containerWidth]="containerWidth" [containerHeight]="containerHeight" [selectedVisualization]="selectedVisualization"></app-visualization>
+        </div>
+    </div>
+    <div #ngControls class="floating-controls" [ngClass]="{'floating-controls-reveal' : showControls}">
+        <div class="d-flex flex-row h-100 justify-content-center">
+            <div *ngFor="let option of options; let i = index" class="d-flex m-2 flex-fill align-items-center justify-content-center visualization-selector-container" [ngClass]="{'selected-visualization' : selectedVisualization == option.val}" (click)="selectVisualization(option.val)">
+                <span class="visualization-selector">
+                    {{option.text}}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
